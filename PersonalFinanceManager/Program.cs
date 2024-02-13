@@ -5,18 +5,15 @@ using System.Text.Json;
 namespace PersonalFinanceManager
 {
     class Program
-    {
-        
+    {  
         static List<User> users = new List<User>();
         static User currentUser;
+        //Uruchamia główną pętlę aplikacji.
         static void Main(string[] args)
         {
-            string userFilePath = "userData.json";
-            
-            currentUser = LoadDataFromFile<User>(userFilePath);
-           
+            string userFilePath = "userData.json"; 
+            currentUser = LoadDataFromFile<User>(userFilePath);          
             bool exit = false;
-
             while (!exit)
             {
                 if (currentUser == null)
@@ -45,7 +42,6 @@ namespace PersonalFinanceManager
                             break;
                     }
                 }
-
                 else
                 {
                     Console.WriteLine("1. Eksport danych użytkownika");
@@ -100,6 +96,8 @@ namespace PersonalFinanceManager
             }
         }
 
+
+        //Dodaje transakcję do profilu użytkownika.
         static void AddTransaction(User currentUser)
         {
             var transaction = new Transaction();
@@ -133,6 +131,8 @@ namespace PersonalFinanceManager
                 }
             }
 
+
+
             string currency;
             while (true)
             {
@@ -152,17 +152,21 @@ namespace PersonalFinanceManager
                 {
                     Console.WriteLine("Nieobsługiwana waluta. Dostępne opcje to USD, EUR, PLN.");
                 }
-            }
+            }     //Pobiera walutę transakcji i konwertuje kwotę na PLN, jeśli to konieczne.
+
+
 
             transaction.Category = GetCategoryFromUser(currentUser);
             transaction.Description = GetDescriptionFromUser();
             transaction.Date = GetDateFromUser();
-
             currentUser.Transactions.Add(transaction);
             Console.WriteLine("Dodano transakcję.");
             UpdateBudgetAfterTransaction(currentUser, transaction.Amount);
         }
 
+
+
+        //Pobiera od użytkownika kwotę transakcji.
         static decimal GetAmountFromUser()
         {
             decimal amount; 
@@ -175,6 +179,9 @@ namespace PersonalFinanceManager
             return amount; 
         }
 
+
+
+        //Pobiera od użytkownika kategorię transakcji.
         static string GetCategoryFromUser(User currentUser)
         {
             string categoryInput;
@@ -200,12 +207,18 @@ namespace PersonalFinanceManager
             return categoryInput;
         }
 
+
+
+        //Pobiera od użytkownika opis transakcji, który może być pusty.
         static string GetDescriptionFromUser()
         {
             Console.Write("Wprowadź opis (można pominąć): ");
             return Console.ReadLine();
         }
 
+
+
+        //Pobiera od użytkownika datę transakcji.
         static DateTime GetDateFromUser()
         {
             Console.Write("Wprowadź datę (format dd.MM.yyyy): ");
@@ -219,6 +232,8 @@ namespace PersonalFinanceManager
         }
 
 
+
+        //Wyświetla listę wszystkich transakcji użytkownika
         static void ShowTransactions(User currentUser)
         {
             Console.WriteLine("Twoje transakcje:");
@@ -242,6 +257,7 @@ namespace PersonalFinanceManager
 
 
 
+        //Rejestruje nowego użytkownika w aplikacji.
         static void RegisterUser()
         {
             Console.Write("Wprowadź nazwę użytkownika: ");
@@ -254,6 +270,10 @@ namespace PersonalFinanceManager
             Console.WriteLine("Użytkownik jest zarejestrowany.");
         }
 
+
+
+
+        //Loguje użytkownika do systemu.
         static void LoginUser()
         {
             Console.Write("Wprowadź nazwę użytkownika: ");
@@ -272,6 +292,11 @@ namespace PersonalFinanceManager
                 Console.WriteLine("Nieprawidłowa nazwa użytkownika lub hasło.");
             }
         }
+
+
+
+
+        //Ustawia budżet dla bieżącego użytkownika.
         static void SetBudget(User currentUser)
         {
             Console.Write("Wprowadź swój nowy budżet: ");
@@ -288,9 +313,13 @@ namespace PersonalFinanceManager
             else
             {
                 Console.WriteLine("Nieprawidłowa kwota, spróbuj ponownie.");
-            }
+            }               //Aktualizuje budżet użytkownika i wyświetla aktualny bilans finansowy.
         }
 
+
+
+
+        //Dodaje nową kategorię do profilu użytkownika.
         static void AddCategory(User currentUser)
         {
             Console.Write("Wprowadź nazwę nowej kategorii wydatków: ");
@@ -301,18 +330,22 @@ namespace PersonalFinanceManager
             {
                 Console.WriteLine("Kategoria już istnieje.");
                 return;
-            }
-
+            }               //Sprawdza, czy kategoria już istnieje w profilu użytkownika.
             currentUser.Categories.Add(new Category { Name = categoryName });
             Console.WriteLine("Dodano kategorię.");
         }
+
+
+
+
+        //Wyświetla podsumowanie finansowe użytkownika.
         static void ShowFinancialSummary(User currentUser)
         {
             if (currentUser.Transactions.Count == 0)
             {
                 Console.WriteLine("W tej chwili nie ma żadnych transakcji.");
                 return;
-            }
+            }           //Informuje, że użytkownik nie ma żadnych transakcji.
 
             var totalExpenses = currentUser.Transactions
                 .Where(t => t.Amount < 0)
@@ -347,8 +380,13 @@ namespace PersonalFinanceManager
             catch (Exception ex)
             {
                 Console.WriteLine($"Nie można przeliczyć waluty: {ex.Message}");
-            }
+            }               //Sprawdza, czy wybrana waluta jest obsługiwana, i konwertuje balans na wybraną walutę.
         }
+
+
+
+
+        //Wyświetla wydatki użytkownika według kategorii.
         static void ShowExpensesByCategory(User currentUser)
         {
             Console.WriteLine("Wydatki według kategorii:");
@@ -361,40 +399,44 @@ namespace PersonalFinanceManager
                 Console.WriteLine($"{category.Name}: {Math.Abs(totalAmount)}");
             }
         }
+
+
+
+
+        //Dodaje przypomnienie dla użytkownika.
         static void AddReminder(User currentUser)
         {
             var reminder = new Reminder();
-
             Console.Write("Wprowadź datę przypomnienia (format dd.MM.yyyy): ");
             string dateString = Console.ReadLine();
             DateTime reminderDate;
-
             
             while (!DateTime.TryParseExact(dateString, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out reminderDate))
             {
                 Console.WriteLine("Nieprawidłowy format daty, spróbuj ponownie (format dd.MM.yyyy): ");
                 dateString = Console.ReadLine();
-            }
+            }           //Wymaga od użytkownika wprowadzenia daty w poprawnym formacie i ustawia datę przypomnienia.
             reminder.ReminderDate = reminderDate;
-
             Console.Write("Wprowadź opis płatności: ");
             reminder.Description = Console.ReadLine();
-
             Console.Write("Wprowadź kwotę płatności: ");
             string amountString = Console.ReadLine();
-            decimal amount;
-
-           
+            decimal amount;   
+            
             while (!decimal.TryParse(amountString, out amount))
             {
                 Console.WriteLine("Nieprawidłowa kwota, spróbuj ponownie: ");
                 amountString = Console.ReadLine();
-            }
+            }           //Wymaga od użytkownika wprowadzenia prawidłowej kwoty i dodaje przypomnienie do listy użytkownika.
             reminder.Amount = amount;
-
             currentUser.Reminders.Add(reminder);
             Console.WriteLine("Dodano przypomnienie.");
         }
+
+
+
+
+        //Wyświetla wszystkie przypomnienia użytkownika.
         static void ShowReminders(User currentUser)
         {
             Console.WriteLine("Aktywne przypomnienia:");
@@ -403,19 +445,19 @@ namespace PersonalFinanceManager
                 Console.WriteLine($"Data: {reminder.ReminderDate.ToShortDateString()},Opis: {reminder.Description}, Kwota: {reminder.Amount}");
             }
         }
+
+
+
+
+
+        //Eksportuje dane użytkownika do pliku.
         static void ExportData(User currentUser)
-        {
-            
-            var options = new JsonSerializerOptions { WriteIndented = true };
-
-            
-            string userDataJson = JsonSerializer.Serialize(currentUser, options);
-
-            
+        {           
+            var options = new JsonSerializerOptions { WriteIndented = true };            
+            string userDataJson = JsonSerializer.Serialize(currentUser, options);          
             Console.Write("Wprowadź ścieżkę do zapisania pliku danych (np. C:\\Users\\Username\\Documents\\userData.json): ");
             string filePath = Console.ReadLine();
-
-            
+           
             try
             {
                 File.WriteAllText(filePath, userDataJson);
@@ -424,8 +466,14 @@ namespace PersonalFinanceManager
             catch (Exception ex)
             {
                 Console.WriteLine($"Wystąpił błąd podczas eksportowania danych: {ex.Message}");
-            }
+            }               //Zapisuje dane użytkownika do pliku, obsługując ewentualne błędy.
         }
+
+
+
+
+
+        //Importuje dane użytkownika z pliku.
         static User ImportData()
         {
             Console.Write("Wprowadź ścieżkę do pliku danych do zaimportowania: ");
@@ -442,20 +490,24 @@ namespace PersonalFinanceManager
             {
                 Console.WriteLine($"Błąd importowania danych: {ex.Message}");
                 return null;
-            }
+            }               //Wczytuje dane użytkownika z pliku JSON i deserializuje je, obsługując błędy.
         }
+
+
+
+
+
+        //Konwertuje kwotę między różnymi walutami.
         static decimal ConvertCurrency(decimal amount, string fromCurrency, string toCurrency)
         {
             // Kursy wymiany walut
             const decimal usdToPlnRate = 4.0m; // 1 USD = 4.0 PLN
             const decimal eurToPlnRate = 4.5m; // 1 EUR = 4.5 PLN
             const decimal usdToEurRate = 0.9m; // 1 USD = 0.9 EUR
-
             if (fromCurrency == toCurrency)
             {
                 return amount;
             }
-
             // Przeliczenie z PLN
             if (fromCurrency == "PLN" && toCurrency == "USD")
             {
@@ -465,8 +517,7 @@ namespace PersonalFinanceManager
             {
                 return amount / eurToPlnRate;
             }
-
-            // Przeliczenie в PLN
+            // Przeliczenie w PLN
             if (fromCurrency == "USD" && toCurrency == "PLN")
             {
                 return amount * usdToPlnRate;
@@ -475,8 +526,7 @@ namespace PersonalFinanceManager
             {
                 return amount * eurToPlnRate;
             }
-
-            // Przeliczenie між USD та EUR
+            // Przeliczenie między USD та EUR
             if (fromCurrency == "USD" && toCurrency == "EUR")
             {
                 return amount * usdToEurRate;
@@ -485,14 +535,26 @@ namespace PersonalFinanceManager
             {
                 return amount / usdToEurRate;
             }
-
-            throw new ArgumentException("Nieobsługiwana waluta");
+            throw new ArgumentException("Nieobsługiwana waluta");   //Wyrzuca wyjątek, gdy podana waluta nie jest obsługiwana.
         }
+
+
+
+
+
+        //Aktualizuje budżet użytkownika po każdej transakcji.
         static void UpdateBudgetAfterTransaction(User currentUser, decimal transactionAmount)
         {
             currentUser.Budget += transactionAmount;
             Console.WriteLine($"Bieżący budżet: {currentUser.Budget}");
         }
+
+
+
+
+
+
+        //Sprawdza, czy użytkownik ma wystarczające środki na dodanie nowego wydatku.
         static bool CanAddExpense(User currentUser, decimal expenseAmount)
         {
             if (currentUser.Budget + expenseAmount < 0) 
@@ -503,6 +565,13 @@ namespace PersonalFinanceManager
             }
             return true;
         }
+
+
+
+
+
+
+        //Zapisuje dane do pliku w formacie JSON.
         public static void SaveDataToFile<T>(string filePath, T data)
         {
             var options = new JsonSerializerOptions { WriteIndented = true };
@@ -510,30 +579,37 @@ namespace PersonalFinanceManager
             File.WriteAllText(filePath, jsonString);
             Console.WriteLine("Zapisane dane użytkownika.");
         }
-        
+
+
+
+
+
+        //Wczytuje dane z pliku JSON i deserializuje je do typu T.
         public static T LoadDataFromFile<T>(string filePath) where T : class
         {
+            //Informuje, że plik danych nie istnieje lub jest pusty, i sugeruje utworzenie nowego profilu użytkownika
             if (!File.Exists(filePath) || new FileInfo(filePath).Length == 0)
             {
                 Console.WriteLine("Nie znaleziono pliku danych. Utworz nowy profil użytkownika.");
                 return null; 
                 
             }
-
             string jsonString = File.ReadAllText(filePath);
+            //Informuje, że plik JSON jest pusty lub zawiera nieprawidłowe dane, i sugeruje utworzenie nowego profilu użytkownika.
             if (string.IsNullOrWhiteSpace(jsonString))
 
             {
                 Console.WriteLine("Plik danych jest pusty lub zawiera nieprawidłowe dane. Utworz nowy profil użytkownika.");
                 return null; 
             }
-
+            //Próbuje deserializować dane użytkownika z JSON, informując o pomyślnym przesłaniu, i zwraca te dane.
             try
             {
                 Console.WriteLine("Dane użytkownika zostały pomyślnie przesłane.");
                 T data = JsonSerializer.Deserialize<T>(jsonString);
                 return data; 
             }
+            //Informuje o błędzie podczas deserializacji danych i sugeruje utworzenie nowego profilu użytkownika w przypadku niepowodzenia.
             catch
             {
                 Console.WriteLine("Wystąpił błąd podczas deserializacji danych. Utworz nowy profil użytkownika.");
