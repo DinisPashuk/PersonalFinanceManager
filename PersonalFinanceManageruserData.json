@@ -1,0 +1,22 @@
+{
+  "Username": "1",
+  "Password": "1",
+  "Budget": 2000.0,
+  "Transactions": [
+    {
+      "Date": "2001-01-01T00:00:00",
+      "Amount": 2000.0,
+      "Currency": null,
+      "Category": "1",
+      "Description": "1",
+      "Type": 0
+    }
+  ],
+  "Categories": [
+    {
+      "Name": "1",
+      "Type": 0
+    }
+  ],
+  "Reminders": []
+}
